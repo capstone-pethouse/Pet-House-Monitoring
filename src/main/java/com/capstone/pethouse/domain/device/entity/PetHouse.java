@@ -1,6 +1,6 @@
 package com.capstone.pethouse.domain.device.entity;
 
-import com.capstone.pethouse.domain.user.entity.User;
+import com.capstone.pethouse.domain.User.entity.User;
 import com.capstone.pethouse.global.common.AuditingFields;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -29,6 +29,7 @@ public class PetHouse extends AuditingFields {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long houseId;
 
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
