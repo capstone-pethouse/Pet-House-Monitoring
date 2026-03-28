@@ -1,0 +1,88 @@
+package com.capstone.pethouse.domain.supply.entity;
+
+import com.capstone.pethouse.domain.device.entity.PetHouse;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+@ToString
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
+@Entity
+public class SupplySchedule {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "house_id", nullable = false)
+    private PetHouse petHouse;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private FeedType type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UnitType unit;
+
+    @Column(nullable = false, precision = 6, scale = 2)
+    private BigDecimal amount;
+
+    @Column(nullable = false, length = 100)
+    private String cronExpression;
+
+    @Column(nullable = false)
+    private boolean enabled = false;            // 기본값 false
+
+    @Column
+    private LocalDateTime lastRunAt;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime modifiedAt;
+
+    private SupplySchedule(PetHouse petHouse, FeedType type, UnitType unit, BigDecimal amount, String cronExpression, boolean enabled) {
+        this.petHouse = petHouse;
+        this.type = type;
+        this.unit = unit;
+        this.amount = amount;
+        this.cronExpression = cronExpression;
+        this.enabled = enabled;
+    }
+
+    public static SupplySchedule of(PetHouse petHouse, FeedType type, UnitType unit, BigDecimal amount, String cronExpression) {
+        return new SupplySchedule(petHouse, type, unit, amount, cronExpression, false);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SupplySchedule that)) return false;
+        return this.id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+}
