@@ -1,4 +1,4 @@
-package com.capstone.pethouse.domain.user.entity;
+package com.capstone.pethouse.domain.User.entity;
 
 import com.capstone.pethouse.domain.device.entity.PetHouse;
 import com.capstone.pethouse.global.common.AuditingFields;
