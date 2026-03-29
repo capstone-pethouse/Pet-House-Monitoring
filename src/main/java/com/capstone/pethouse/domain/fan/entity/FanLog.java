@@ -1,8 +1,8 @@
-package com.capstone.pethouse.domain.supply.entity;
+package com.capstone.pethouse.domain.fan.entity;
 
 import com.capstone.pethouse.domain.device.entity.PetHouse;
 import com.capstone.pethouse.domain.enums.ExecutionStatus;
-import com.capstone.pethouse.domain.enums.FeedType;
+import com.capstone.pethouse.domain.enums.TriggerType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,10 +18,10 @@ import java.util.Objects;
 
 @ToString
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 @Entity
-public class SupplyLog {
+public class FanLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,45 +30,57 @@ public class SupplyLog {
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schedule_id")
-    private SupplySchedule supplySchedule;
+    private FanSchedule fanSchedule;
 
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "house_id")    // FK 등록, 수정, 삭제
+    @JoinColumn(name = "house_id", nullable = false)
     private PetHouse petHouse;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private FeedType type;
+    @Column(nullable = false, precision = 3, scale = 1)
+    private BigDecimal temperature;
 
-    @Column(nullable = false, precision = 6, scale = 2)
-    private BigDecimal amount;
+    @Column(nullable = false)
+    private Integer speed;
+
+    @Column(nullable = false)
+    private LocalDateTime startTime;
+
+    @Column(nullable = false)
+    private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ExecutionStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TriggerType triggerType;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private SupplyLog(SupplySchedule supplySchedule, PetHouse petHouse, FeedType type, BigDecimal amount, ExecutionStatus status) {
-        this.supplySchedule = supplySchedule;
+    private FanLog(FanSchedule fanSchedule, PetHouse petHouse, BigDecimal temperature, Integer speed, LocalDateTime startTime, LocalDateTime endTime, TriggerType triggerType, ExecutionStatus status) {
+        this.fanSchedule = fanSchedule;
         this.petHouse = petHouse;
-        this.type = type;
-        this.amount = amount;
+        this.temperature = temperature;
+        this.speed = speed;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.triggerType = triggerType;
         this.status = status;
     }
 
-    public static SupplyLog of(SupplySchedule supplySchedule, PetHouse petHouse, FeedType type, BigDecimal amount, ExecutionStatus status) {
-        return new SupplyLog(supplySchedule, petHouse, type, amount, status);
+    public static FanLog of(FanSchedule fanSchedule, PetHouse petHouse, BigDecimal temperature, Integer speed, LocalDateTime startTime, LocalDateTime endTime, TriggerType triggerType, ExecutionStatus status) {
+        return new FanLog(fanSchedule, petHouse, temperature, speed, startTime, endTime, triggerType, status);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SupplyLog that)) return false;
+        if (!(o instanceof FanLog that)) return false;
         return this.id != null && Objects.equals(id, that.id);
     }
 

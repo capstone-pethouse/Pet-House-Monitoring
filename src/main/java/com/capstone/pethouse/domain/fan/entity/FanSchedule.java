@@ -1,8 +1,6 @@
-package com.capstone.pethouse.domain.supply.entity;
+package com.capstone.pethouse.domain.fan.entity;
 
 import com.capstone.pethouse.domain.device.entity.PetHouse;
-import com.capstone.pethouse.domain.enums.FeedType;
-import com.capstone.pethouse.domain.enums.UnitType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,14 +13,24 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 
 @ToString
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "fan_schedule",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_fan_schedule_house_condition",
+                        columnNames = {"house_id", "start_time", "end_time"}
+                )
+        }
+)
 @Entity
-public class SupplySchedule {
+public class FanSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,25 +41,20 @@ public class SupplySchedule {
     @JoinColumn(name = "house_id", nullable = false)
     private PetHouse petHouse;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private FeedType type;
+    private boolean enabled = true;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UnitType unit;
-
-    @Column(nullable = false, precision = 6, scale = 2)
-    private BigDecimal amount;
-
-    @Column(nullable = false, length = 100)
-    private String cronExpression;
+    @Column(nullable = false, precision = 3, scale = 1)
+    private BigDecimal temperature;
 
     @Column(nullable = false)
-    private boolean enabled = false;            // 기본값 false
+    private Integer speed;
 
-    @Column
-    private LocalDateTime lastRunAt;
+    @Column(nullable = false)
+    private LocalTime startTime;
+
+    @Column(nullable = false)
+    private LocalTime endTime;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreatedDate
@@ -63,23 +66,23 @@ public class SupplySchedule {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
-    private SupplySchedule(PetHouse petHouse, FeedType type, UnitType unit, BigDecimal amount, String cronExpression, boolean enabled) {
+    private FanSchedule(PetHouse petHouse, boolean enabled, BigDecimal temperature, Integer speed, LocalTime startTime, LocalTime endTime) {
         this.petHouse = petHouse;
-        this.type = type;
-        this.unit = unit;
-        this.amount = amount;
-        this.cronExpression = cronExpression;
         this.enabled = enabled;
+        this.temperature = temperature;
+        this.speed = speed;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
-    public static SupplySchedule of(PetHouse petHouse, FeedType type, UnitType unit, BigDecimal amount, String cronExpression) {
-        return new SupplySchedule(petHouse, type, unit, amount, cronExpression, false);
+    public static FanSchedule of(PetHouse petHouse, BigDecimal temperature, Integer speed, LocalTime startTime, LocalTime endTime) {
+        return new FanSchedule(petHouse, true, temperature, speed, startTime, endTime);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SupplySchedule that)) return false;
+        if (!(o instanceof FanSchedule that)) return false;
         return this.id != null && Objects.equals(id, that.id);
     }
 

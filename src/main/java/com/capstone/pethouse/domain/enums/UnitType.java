@@ -1,4 +1,4 @@
-package com.capstone.pethouse.domain.supply.entity;
+package com.capstone.pethouse.domain.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;

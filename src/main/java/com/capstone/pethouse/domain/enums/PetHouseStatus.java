@@ -1,4 +1,4 @@
-package com.capstone.pethouse.domain.device.entity;
+package com.capstone.pethouse.domain.enums;
 
 import lombok.Getter;
 
