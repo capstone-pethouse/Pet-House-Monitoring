@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum ExecutionStatus {
     SUCCESS("성공"),
+    PROCEEDING("진행중"),
     FAIL("실패");
 
     private final String description;

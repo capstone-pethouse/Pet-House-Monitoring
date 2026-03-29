@@ -63,17 +63,38 @@ public class SupplyLog {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private SupplyLog(SupplySchedule supplySchedule, PetHouse petHouse, FeedType feedType, BigDecimal amount, ExecutionStatus executionStatus, TriggerType triggerType) {
+    private SupplyLog(SupplySchedule supplySchedule, PetHouse petHouse, FeedType feedType, UnitType unitType, BigDecimal amount, ExecutionStatus executionStatus, TriggerType triggerType) {
         this.supplySchedule = supplySchedule;
         this.petHouse = petHouse;
         this.feedType = feedType;
+        this.unitType = unitType;
         this.amount = amount;
         this.executionStatus = executionStatus;
         this.triggerType = triggerType;
     }
 
-    public static SupplyLog of(SupplySchedule supplySchedule, PetHouse petHouse, FeedType feedType, BigDecimal amount, ExecutionStatus executionStatus, TriggerType triggerType) {
-        return new SupplyLog(supplySchedule, petHouse, feedType, amount, executionStatus, triggerType);
+    public static SupplyLog ofManual(PetHouse petHouse, FeedType feedType, UnitType unitType, BigDecimal amount) {
+        return new SupplyLog(
+                null,                   // 수동 공급은 schedule이 없음
+                petHouse,
+                feedType,
+                unitType,
+                amount,
+                ExecutionStatus.PROCEEDING,
+                TriggerType.MANUAL
+        );
+    }
+
+    public static SupplyLog ofScheduled(SupplySchedule supplySchedule, PetHouse petHouse, FeedType feedType, UnitType unitType, BigDecimal amount) {
+        return new SupplyLog(
+                supplySchedule,
+                petHouse,
+                feedType,
+                unitType,
+                amount,
+                ExecutionStatus.PROCEEDING,
+                TriggerType.AUTO
+        );
     }
 
     @Override
