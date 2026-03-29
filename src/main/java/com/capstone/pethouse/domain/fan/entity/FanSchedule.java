@@ -1,0 +1,93 @@
+package com.capstone.pethouse.domain.fan.entity;
+
+import com.capstone.pethouse.domain.device.entity.PetHouse;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Objects;
+
+@ToString
+@Getter
+@EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "fan_schedule",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_fan_schedule_house_condition",
+                        columnNames = {"house_id", "start_time", "end_time"}
+                )
+        }
+)
+@Entity
+public class FanSchedule {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "house_id", nullable = false)
+    private PetHouse petHouse;
+
+    @Column(nullable = false)
+    private boolean enabled = true;
+
+    @Column(nullable = false, precision = 3, scale = 1)
+    private BigDecimal temperature;
+
+    @Column(nullable = false)
+    private Integer speed;
+
+    @Column(nullable = false)
+    private LocalTime startTime;
+
+    @Column(nullable = false)
+    private LocalTime endTime;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime modifiedAt;
+
+    private FanSchedule(PetHouse petHouse, boolean enabled, BigDecimal temperature, Integer speed, LocalTime startTime, LocalTime endTime) {
+        this.petHouse = petHouse;
+        this.enabled = enabled;
+        this.temperature = temperature;
+        this.speed = speed;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
+    public static FanSchedule of(PetHouse petHouse, BigDecimal temperature, Integer speed, LocalTime startTime, LocalTime endTime) {
+        return new FanSchedule(petHouse, true, temperature, speed, startTime, endTime);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FanSchedule that)) return false;
+        return this.id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+}
