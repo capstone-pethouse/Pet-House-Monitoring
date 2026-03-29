@@ -15,6 +15,7 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
+        name = "pet_house",
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_pet_house_user_id_nickname",
