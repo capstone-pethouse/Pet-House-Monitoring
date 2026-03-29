@@ -35,11 +35,11 @@ public class SupplySchedule {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private FeedType type;
+    private FeedType feedType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UnitType unit;
+    private UnitType unitType;
 
     @Column(nullable = false, precision = 6, scale = 2)
     private BigDecimal amount;
@@ -63,17 +63,17 @@ public class SupplySchedule {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
-    private SupplySchedule(PetHouse petHouse, FeedType type, UnitType unit, BigDecimal amount, String cronExpression, boolean enabled) {
+    private SupplySchedule(PetHouse petHouse, FeedType feedType, UnitType unitType, BigDecimal amount, String cronExpression, boolean enabled) {
         this.petHouse = petHouse;
-        this.type = type;
-        this.unit = unit;
+        this.feedType = feedType;
+        this.unitType = unitType;
         this.amount = amount;
         this.cronExpression = cronExpression;
         this.enabled = enabled;
     }
 
-    public static SupplySchedule of(PetHouse petHouse, FeedType type, UnitType unit, BigDecimal amount, String cronExpression) {
-        return new SupplySchedule(petHouse, type, unit, amount, cronExpression, false);
+    public static SupplySchedule of(PetHouse petHouse, FeedType feedType, UnitType unitType, BigDecimal amount, String cronExpression) {
+        return new SupplySchedule(petHouse, feedType, unitType, amount, cronExpression, false);
     }
 
     @Override

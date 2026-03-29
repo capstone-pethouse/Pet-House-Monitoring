@@ -3,6 +3,8 @@ package com.capstone.pethouse.domain.supply.entity;
 import com.capstone.pethouse.domain.device.entity.PetHouse;
 import com.capstone.pethouse.domain.enums.ExecutionStatus;
 import com.capstone.pethouse.domain.enums.FeedType;
+import com.capstone.pethouse.domain.enums.TriggerType;
+import com.capstone.pethouse.domain.enums.UnitType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -39,30 +41,39 @@ public class SupplyLog {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private FeedType type;
+    private FeedType feedType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UnitType unitType;
 
     @Column(nullable = false, precision = 6, scale = 2)
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ExecutionStatus status;
+    private ExecutionStatus executionStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TriggerType triggerType;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private SupplyLog(SupplySchedule supplySchedule, PetHouse petHouse, FeedType type, BigDecimal amount, ExecutionStatus status) {
+    private SupplyLog(SupplySchedule supplySchedule, PetHouse petHouse, FeedType feedType, BigDecimal amount, ExecutionStatus executionStatus, TriggerType triggerType) {
         this.supplySchedule = supplySchedule;
         this.petHouse = petHouse;
-        this.type = type;
+        this.feedType = feedType;
         this.amount = amount;
-        this.status = status;
+        this.executionStatus = executionStatus;
+        this.triggerType = triggerType;
     }
 
-    public static SupplyLog of(SupplySchedule supplySchedule, PetHouse petHouse, FeedType type, BigDecimal amount, ExecutionStatus status) {
-        return new SupplyLog(supplySchedule, petHouse, type, amount, status);
+    public static SupplyLog of(SupplySchedule supplySchedule, PetHouse petHouse, FeedType feedType, BigDecimal amount, ExecutionStatus executionStatus, TriggerType triggerType) {
+        return new SupplyLog(supplySchedule, petHouse, feedType, amount, executionStatus, triggerType);
     }
 
     @Override

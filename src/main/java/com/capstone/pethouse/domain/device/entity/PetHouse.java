@@ -41,7 +41,7 @@ public class PetHouse extends AuditingFields {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PetHouseStatus status;
+    private PetHouseStatus petHouseStatus;
 
     @Column(nullable = false)
     private Boolean isOccupied;
@@ -49,16 +49,16 @@ public class PetHouse extends AuditingFields {
     @Column(nullable = false)
     private LocalDateTime lastConnectedAt;
 
-    private PetHouse(User user, String nickname, PetHouseStatus status, Boolean isOccupied, LocalDateTime lastConnectedAt) {
+    private PetHouse(User user, String nickname, PetHouseStatus petHouseStatus, Boolean isOccupied, LocalDateTime lastConnectedAt) {
         this.user = user;
         this.nickname = nickname;
-        this.status = status;
+        this.petHouseStatus = petHouseStatus;
         this.isOccupied = isOccupied;
         this.lastConnectedAt = lastConnectedAt;
     }
 
-    public static PetHouse of(User user, String nickname, PetHouseStatus status, Boolean isOccupied, LocalDateTime lastConnectedAt) {
-        return new PetHouse(user, nickname, status, isOccupied, lastConnectedAt);
+    public static PetHouse of(User user, String nickname, PetHouseStatus petHouseStatus, Boolean isOccupied, LocalDateTime lastConnectedAt) {
+        return new PetHouse(user, nickname, petHouseStatus, isOccupied, lastConnectedAt);
     }
 
     public static PetHouse createDefault(User user, String nickname) {

@@ -51,7 +51,7 @@ public class FanLog {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ExecutionStatus status;
+    private ExecutionStatus executionStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -62,7 +62,7 @@ public class FanLog {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private FanLog(FanSchedule fanSchedule, PetHouse petHouse, BigDecimal temperature, Integer speed, LocalDateTime startTime, LocalDateTime endTime, TriggerType triggerType, ExecutionStatus status) {
+    private FanLog(FanSchedule fanSchedule, PetHouse petHouse, BigDecimal temperature, Integer speed, LocalDateTime startTime, LocalDateTime endTime, TriggerType triggerType, ExecutionStatus executionStatus) {
         this.fanSchedule = fanSchedule;
         this.petHouse = petHouse;
         this.temperature = temperature;
@@ -70,11 +70,11 @@ public class FanLog {
         this.startTime = startTime;
         this.endTime = endTime;
         this.triggerType = triggerType;
-        this.status = status;
+        this.executionStatus = executionStatus;
     }
 
-    public static FanLog of(FanSchedule fanSchedule, PetHouse petHouse, BigDecimal temperature, Integer speed, LocalDateTime startTime, LocalDateTime endTime, TriggerType triggerType, ExecutionStatus status) {
-        return new FanLog(fanSchedule, petHouse, temperature, speed, startTime, endTime, triggerType, status);
+    public static FanLog of(FanSchedule fanSchedule, PetHouse petHouse, BigDecimal temperature, Integer speed, LocalDateTime startTime, LocalDateTime endTime, TriggerType triggerType, ExecutionStatus executionStatus) {
+        return new FanLog(fanSchedule, petHouse, temperature, speed, startTime, endTime, triggerType, executionStatus);
     }
 
     @Override
