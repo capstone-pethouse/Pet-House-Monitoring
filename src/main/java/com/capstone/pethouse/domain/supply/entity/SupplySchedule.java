@@ -1,6 +1,8 @@
 package com.capstone.pethouse.domain.supply.entity;
 
 import com.capstone.pethouse.domain.device.entity.PetHouse;
+import com.capstone.pethouse.domain.enums.FeedType;
+import com.capstone.pethouse.domain.enums.UnitType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

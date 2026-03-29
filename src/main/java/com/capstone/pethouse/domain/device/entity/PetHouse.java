@@ -1,6 +1,7 @@
 package com.capstone.pethouse.domain.device.entity;
 
 import com.capstone.pethouse.domain.User.entity.User;
+import com.capstone.pethouse.domain.enums.PetHouseStatus;
 import com.capstone.pethouse.global.common.AuditingFields;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
