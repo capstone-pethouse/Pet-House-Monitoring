@@ -4,6 +4,7 @@ import com.capstone.pethouse.domain.device.entity.PetHouse;
 import com.capstone.pethouse.domain.enums.ExecutionStatus;
 import com.capstone.pethouse.domain.enums.FeedType;
 import com.capstone.pethouse.domain.enums.TriggerType;
+import com.capstone.pethouse.domain.enums.UnitType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -41,6 +42,10 @@ public class SupplyLog {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private FeedType feedType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UnitType unitType;
 
     @Column(nullable = false, precision = 6, scale = 2)
     private BigDecimal amount;
