@@ -1,6 +1,8 @@
 package com.capstone.pethouse.domain.supply.entity;
 
 import com.capstone.pethouse.domain.device.entity.PetHouse;
+import com.capstone.pethouse.domain.enums.ExecutionStatus;
+import com.capstone.pethouse.domain.enums.FeedType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -44,14 +46,14 @@ public class SupplyLog {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private FeedStatus status;
+    private ExecutionStatus status;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private SupplyLog(SupplySchedule supplySchedule, PetHouse petHouse, FeedType type, BigDecimal amount, FeedStatus status) {
+    private SupplyLog(SupplySchedule supplySchedule, PetHouse petHouse, FeedType type, BigDecimal amount, ExecutionStatus status) {
         this.supplySchedule = supplySchedule;
         this.petHouse = petHouse;
         this.type = type;
@@ -59,7 +61,7 @@ public class SupplyLog {
         this.status = status;
     }
 
-    public static SupplyLog of(SupplySchedule supplySchedule, PetHouse petHouse, FeedType type, BigDecimal amount, FeedStatus status) {
+    public static SupplyLog of(SupplySchedule supplySchedule, PetHouse petHouse, FeedType type, BigDecimal amount, ExecutionStatus status) {
         return new SupplyLog(supplySchedule, petHouse, type, amount, status);
     }
 
