@@ -2,9 +2,10 @@ package com.capstone.pethouse.domain.supply.service;
 
 import com.capstone.pethouse.domain.device.entity.PetHouse;
 import com.capstone.pethouse.domain.device.repository.PetHouseRepository;
-import com.capstone.pethouse.domain.supply.dto.request.DispenseRequest;
+import com.capstone.pethouse.domain.enums.TriggerType;
+import com.capstone.pethouse.domain.supply.dto.request.SupplyLogRequest;
 import com.capstone.pethouse.domain.supply.dto.request.ScheduleRequest;
-import com.capstone.pethouse.domain.supply.dto.response.DispenseResponse;
+import com.capstone.pethouse.domain.supply.dto.response.SupplyLogResponse;
 import com.capstone.pethouse.domain.supply.dto.response.ScheduleResponse;
 import com.capstone.pethouse.domain.supply.entity.SupplyLog;
 import com.capstone.pethouse.domain.supply.entity.SupplySchedule;
@@ -23,17 +24,28 @@ public class SupplyService {
     private final PetHouseRepository petHouseRepository;
     private final SupplyScheduleRepository supplyScheduleRepository;
 
-    public DispenseResponse dispenseFood(Long id, DispenseRequest dispenseRequest) {
+    public SupplyLogResponse recordSupplyLog(Long id, SupplyLogRequest supplyLogRequest) {
         PetHouse petHouse = petHouseRepository.getReferenceById(id);
 
-        SupplyLog supplyLog = SupplyLog.ofManual(
-                petHouse,
-                dispenseRequest.feedType(),
-                dispenseRequest.unitType(),
-                dispenseRequest.amount()
-        );
-
-        return DispenseResponse.from(supplyLogRepository.save(supplyLog));
+        SupplyLog supplyLog;
+        if (supplyLogRequest.triggerType() == TriggerType.MANUAL) {
+            supplyLog = SupplyLog.ofManual(
+                    petHouse,
+                    supplyLogRequest.feedType(),
+                    supplyLogRequest.unitType(),
+                    supplyLogRequest.amount()
+            );
+        } else {
+            SupplySchedule supplySchedule = supplyScheduleRepository.getReferenceById(supplyLogRequest.scheduleId());
+            supplyLog = SupplyLog.ofScheduled(
+                    supplySchedule,
+                    petHouse,
+                    supplyLogRequest.feedType(),
+                    supplyLogRequest.unitType(),
+                    supplyLogRequest.amount()
+            );
+        }
+        return SupplyLogResponse.from(supplyLogRepository.save(supplyLog));
     }
 
     public ScheduleResponse postSchedule(Long id, ScheduleRequest scheduleRequest) {
