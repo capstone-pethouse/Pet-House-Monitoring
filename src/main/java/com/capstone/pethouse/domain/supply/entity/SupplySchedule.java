@@ -21,6 +21,15 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
+@Table(
+        name = "supply_schedule",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_supply_schedule_house_condition",
+                        columnNames = {"house_id", "feed_type", "cron_expression"}
+            )
+        }
+)
 @Entity
 public class SupplySchedule {
 
