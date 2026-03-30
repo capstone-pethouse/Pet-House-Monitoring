@@ -8,7 +8,7 @@ import com.capstone.pethouse.domain.supply.entity.SupplyLog;
 
 import java.math.BigDecimal;
 
-public record DispenseResponse(
+public record SupplyLogResponse(
         Long houseId,
         FeedType feedType,
         UnitType unitType,
@@ -17,8 +17,8 @@ public record DispenseResponse(
         ExecutionStatus executionStatus
 ) {
 
-    public static DispenseResponse from(SupplyLog supplyLog) {
-        return new DispenseResponse(
+    public static SupplyLogResponse from(SupplyLog supplyLog) {
+        return new SupplyLogResponse(
                 supplyLog.getPetHouse().getHouseId(),
                 supplyLog.getFeedType(),
                 supplyLog.getUnitType(),
