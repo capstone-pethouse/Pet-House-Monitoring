@@ -1,0 +1,30 @@
+package com.capstone.pethouse.domain.supply.dto.response;
+
+import com.capstone.pethouse.domain.enums.FeedType;
+import com.capstone.pethouse.domain.enums.UnitType;
+import com.capstone.pethouse.domain.supply.entity.SupplySchedule;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+public record ScheduleResponse(
+        Long houseId,
+        FeedType feedType,
+        UnitType unitType,
+        BigDecimal amount,
+        String cronExpression,
+        boolean enabled,
+        LocalDateTime lastRunAt
+) {
+    public static ScheduleResponse from(SupplySchedule supplySchedule) {
+        return new ScheduleResponse(
+                supplySchedule.getPetHouse().getHouseId(),
+                supplySchedule.getFeedType(), 
+                supplySchedule.getUnitType(), 
+                supplySchedule.getAmount(), 
+                supplySchedule.getCronExpression(), 
+                supplySchedule.isEnabled(),
+                supplySchedule.getLastRunAt()
+        );
+    }
+}

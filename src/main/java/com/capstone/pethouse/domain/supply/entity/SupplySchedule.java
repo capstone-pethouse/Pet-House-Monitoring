@@ -21,6 +21,15 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
+@Table(
+        name = "supply_schedule",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_supply_schedule_house_condition",
+                        columnNames = {"house_id", "feed_type", "cron_expression"}
+            )
+        }
+)
 @Entity
 public class SupplySchedule {
 
@@ -48,7 +57,7 @@ public class SupplySchedule {
     private String cronExpression;
 
     @Column(nullable = false)
-    private boolean enabled = false;            // 기본값 false
+    private boolean enabled = true;            // 기본값 true
 
     @Column
     private LocalDateTime lastRunAt;
@@ -63,17 +72,18 @@ public class SupplySchedule {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
-    private SupplySchedule(PetHouse petHouse, FeedType feedType, UnitType unitType, BigDecimal amount, String cronExpression, boolean enabled) {
+    private SupplySchedule(PetHouse petHouse, FeedType feedType, UnitType unitType, BigDecimal amount, String cronExpression, boolean enabled, LocalDateTime lastRunAt) {
         this.petHouse = petHouse;
         this.feedType = feedType;
         this.unitType = unitType;
         this.amount = amount;
         this.cronExpression = cronExpression;
         this.enabled = enabled;
+        this.lastRunAt = lastRunAt;
     }
 
     public static SupplySchedule of(PetHouse petHouse, FeedType feedType, UnitType unitType, BigDecimal amount, String cronExpression) {
-        return new SupplySchedule(petHouse, feedType, unitType, amount, cronExpression, false);
+        return new SupplySchedule(petHouse, feedType, unitType, amount, cronExpression, true, null);
     }
 
     @Override
