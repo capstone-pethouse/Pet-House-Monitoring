@@ -3,11 +3,16 @@ package com.capstone.pethouse.domain.supply.controller;
 import com.capstone.pethouse.domain.supply.dto.request.SupplyLogRequest;
 import com.capstone.pethouse.domain.supply.dto.request.ScheduleRequest;
 import com.capstone.pethouse.domain.supply.dto.response.ScheduleToggleResponse;
+import com.capstone.pethouse.domain.supply.dto.response.SupplyLogHistoryResponse;
 import com.capstone.pethouse.domain.supply.dto.response.SupplyLogResponse;
 import com.capstone.pethouse.domain.supply.dto.response.ScheduleResponse;
 import com.capstone.pethouse.domain.supply.service.SupplyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -54,5 +59,13 @@ public class SupplyController {
             @RequestBody SupplyLogRequest supplyLogRequest
     ) {
         return supplyService.recordSupplyLog(houseId, supplyLogRequest);
+    }
+
+    @GetMapping("/{houseId}/supplier/record")
+    public Page<SupplyLogHistoryResponse> getSupplyHistory(
+            @PathVariable Long houseId,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return supplyService.getSupplyHistory(houseId, pageable);
     }
 }
