@@ -4,6 +4,7 @@ import com.capstone.pethouse.domain.device.entity.PetHouse;
 import com.capstone.pethouse.domain.device.repository.PetHouseRepository;
 import com.capstone.pethouse.domain.supply.dto.request.SupplyLogRequest;
 import com.capstone.pethouse.domain.supply.dto.request.ScheduleRequest;
+import com.capstone.pethouse.domain.supply.dto.response.ScheduleToggleResponse;
 import com.capstone.pethouse.domain.supply.dto.response.SupplyLogResponse;
 import com.capstone.pethouse.domain.supply.dto.response.ScheduleResponse;
 import com.capstone.pethouse.domain.supply.entity.SupplyLog;
@@ -23,19 +24,6 @@ public class SupplyService {
     private final SupplyLogRepository supplyLogRepository;
     private final PetHouseRepository petHouseRepository;
     private final SupplyScheduleRepository supplyScheduleRepository;
-
-    public SupplyLogResponse recordSupplyLog(Long houseId, SupplyLogRequest supplyLogRequest) {
-        PetHouse petHouse = petHouseRepository.getReferenceById(houseId);
-
-        SupplyLog supplyLog = SupplyLog.ofManual(
-                petHouse,
-                supplyLogRequest.feedType(),
-                supplyLogRequest.unitType(),
-                supplyLogRequest.amount()
-        );
-
-        return SupplyLogResponse.from(supplyLogRepository.save(supplyLog));
-    }
 
     public ScheduleResponse postSchedule(Long houseId, ScheduleRequest scheduleRequest) {
         if (supplyScheduleRepository.existsByPetHouse_HouseIdAndFeedTypeAndCronExpression(houseId, scheduleRequest.feedType(), scheduleRequest.cronExpression())) {
@@ -70,5 +58,27 @@ public class SupplyService {
         );
 
         return ScheduleResponse.from(supplySchedule);
+    }
+
+    public ScheduleToggleResponse toggleSchedule(Long houseId, Long scheduleId, boolean enabled) {
+        SupplySchedule supplySchedule = supplyScheduleRepository.findByPetHouse_HouseIdAndId(houseId, scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 스케줄을 찾을 수 없습니다."));
+
+        supplySchedule.toggleSupplySchedule(enabled);
+
+        return ScheduleToggleResponse.from(supplySchedule);
+    }
+
+    public SupplyLogResponse recordSupplyLog(Long houseId, SupplyLogRequest supplyLogRequest) {
+        PetHouse petHouse = petHouseRepository.getReferenceById(houseId);
+
+        SupplyLog supplyLog = SupplyLog.ofManual(
+                petHouse,
+                supplyLogRequest.feedType(),
+                supplyLogRequest.unitType(),
+                supplyLogRequest.amount()
+        );
+
+        return SupplyLogResponse.from(supplyLogRepository.save(supplyLog));
     }
 }
