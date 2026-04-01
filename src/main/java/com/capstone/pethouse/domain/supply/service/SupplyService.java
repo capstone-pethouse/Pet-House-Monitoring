@@ -28,6 +28,13 @@ public class SupplyService {
     private final PetHouseRepository petHouseRepository;
     private final SupplyScheduleRepository supplyScheduleRepository;
 
+    @Transactional(readOnly = true)
+    public Page<ScheduleResponse> getSchedules(Long houseId, Pageable pageable) {
+        Page<SupplySchedule> supplySchedulePage = supplyScheduleRepository.findByPetHouse_HouseId(houseId, pageable);
+
+        return supplySchedulePage.map(ScheduleResponse::from);
+    }
+
     public ScheduleResponse postSchedule(Long houseId, ScheduleRequest scheduleRequest) {
         if (supplyScheduleRepository.existsByPetHouse_HouseIdAndFeedTypeAndCronExpression(houseId, scheduleRequest.feedType(), scheduleRequest.cronExpression())) {
             throw new IllegalStateException("이미 동일한 스케줄이 존재합니다.");
