@@ -72,6 +72,15 @@ public class SupplyService {
         return ScheduleToggleResponse.from(supplySchedule);
     }
 
+    public Long deleteSchedule(Long houseId, Long scheduleId) {
+        SupplySchedule supplySchedule = supplyScheduleRepository.findByPetHouse_HouseIdAndId(houseId, scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 스케줄을 찾을 수 없습니다."));
+
+        supplyScheduleRepository.delete(supplySchedule);
+
+        return supplySchedule.getId();
+    }
+
     public SupplyLogResponse recordSupplyLog(Long houseId, SupplyLogRequest supplyLogRequest) {
         PetHouse petHouse = petHouseRepository.getReferenceById(houseId);
 
@@ -85,6 +94,7 @@ public class SupplyService {
         return SupplyLogResponse.from(supplyLogRepository.save(supplyLog));
     }
 
+    @Transactional(readOnly = true)
     public Page<SupplyLogHistoryResponse> getSupplyHistory(Long houseId, Pageable pageable) {
         Page<SupplyLog> supplyLogsPage = supplyLogRepository.findByPetHouse_HouseId(houseId, pageable);
 
