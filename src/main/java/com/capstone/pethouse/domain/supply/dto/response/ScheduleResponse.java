@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 public record ScheduleResponse(
         Long houseId,
+        Long scheduleId,
         FeedType feedType,
         UnitType unitType,
         BigDecimal amount,
@@ -19,6 +20,7 @@ public record ScheduleResponse(
     public static ScheduleResponse from(SupplySchedule supplySchedule) {
         return new ScheduleResponse(
                 supplySchedule.getPetHouse().getHouseId(),
+                supplySchedule.getId(),
                 supplySchedule.getFeedType(), 
                 supplySchedule.getUnitType(), 
                 supplySchedule.getAmount(), 
