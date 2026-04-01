@@ -5,6 +5,7 @@ import com.capstone.pethouse.domain.device.repository.PetHouseRepository;
 import com.capstone.pethouse.domain.supply.dto.request.SupplyLogRequest;
 import com.capstone.pethouse.domain.supply.dto.request.ScheduleRequest;
 import com.capstone.pethouse.domain.supply.dto.response.ScheduleToggleResponse;
+import com.capstone.pethouse.domain.supply.dto.response.SupplyLogHistoryResponse;
 import com.capstone.pethouse.domain.supply.dto.response.SupplyLogResponse;
 import com.capstone.pethouse.domain.supply.dto.response.ScheduleResponse;
 import com.capstone.pethouse.domain.supply.entity.SupplyLog;
@@ -13,6 +14,8 @@ import com.capstone.pethouse.domain.supply.repository.SupplyLogRepository;
 import com.capstone.pethouse.domain.supply.repository.SupplyScheduleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,5 +83,11 @@ public class SupplyService {
         );
 
         return SupplyLogResponse.from(supplyLogRepository.save(supplyLog));
+    }
+
+    public Page<SupplyLogHistoryResponse> getSupplyHistory(Long houseId, Pageable pageable) {
+        Page<SupplyLog> supplyLogsPage = supplyLogRepository.findByPetHouse_HouseId(houseId, pageable);
+
+        return supplyLogsPage.map(SupplyLogHistoryResponse::from);
     }
 }
