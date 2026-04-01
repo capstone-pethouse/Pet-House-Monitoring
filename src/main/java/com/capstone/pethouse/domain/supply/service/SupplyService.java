@@ -2,15 +2,16 @@ package com.capstone.pethouse.domain.supply.service;
 
 import com.capstone.pethouse.domain.device.entity.PetHouse;
 import com.capstone.pethouse.domain.device.repository.PetHouseRepository;
-import com.capstone.pethouse.domain.enums.TriggerType;
 import com.capstone.pethouse.domain.supply.dto.request.SupplyLogRequest;
 import com.capstone.pethouse.domain.supply.dto.request.ScheduleRequest;
+import com.capstone.pethouse.domain.supply.dto.response.ScheduleToggleResponse;
 import com.capstone.pethouse.domain.supply.dto.response.SupplyLogResponse;
 import com.capstone.pethouse.domain.supply.dto.response.ScheduleResponse;
 import com.capstone.pethouse.domain.supply.entity.SupplyLog;
 import com.capstone.pethouse.domain.supply.entity.SupplySchedule;
 import com.capstone.pethouse.domain.supply.repository.SupplyLogRepository;
 import com.capstone.pethouse.domain.supply.repository.SupplyScheduleRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,36 +25,12 @@ public class SupplyService {
     private final PetHouseRepository petHouseRepository;
     private final SupplyScheduleRepository supplyScheduleRepository;
 
-    public SupplyLogResponse recordSupplyLog(Long id, SupplyLogRequest supplyLogRequest) {
-        PetHouse petHouse = petHouseRepository.getReferenceById(id);
-
-        SupplyLog supplyLog;
-        if (supplyLogRequest.triggerType() == TriggerType.MANUAL) {
-            supplyLog = SupplyLog.ofManual(
-                    petHouse,
-                    supplyLogRequest.feedType(),
-                    supplyLogRequest.unitType(),
-                    supplyLogRequest.amount()
-            );
-        } else {
-            SupplySchedule supplySchedule = supplyScheduleRepository.getReferenceById(supplyLogRequest.scheduleId());
-            supplyLog = SupplyLog.ofScheduled(
-                    supplySchedule,
-                    petHouse,
-                    supplyLogRequest.feedType(),
-                    supplyLogRequest.unitType(),
-                    supplyLogRequest.amount()
-            );
-        }
-        return SupplyLogResponse.from(supplyLogRepository.save(supplyLog));
-    }
-
-    public ScheduleResponse postSchedule(Long id, ScheduleRequest scheduleRequest) {
-        if (supplyScheduleRepository.existsByPetHouse_HouseIdAndFeedTypeAndCronExpression(id, scheduleRequest.feedType(), scheduleRequest.cronExpression())) {
+    public ScheduleResponse postSchedule(Long houseId, ScheduleRequest scheduleRequest) {
+        if (supplyScheduleRepository.existsByPetHouse_HouseIdAndFeedTypeAndCronExpression(houseId, scheduleRequest.feedType(), scheduleRequest.cronExpression())) {
             throw new IllegalStateException("이미 동일한 스케줄이 존재합니다.");
         }
 
-        PetHouse petHouse = petHouseRepository.getReferenceById(id);
+        PetHouse petHouse = petHouseRepository.getReferenceById(houseId);
         SupplySchedule supplySchedule = SupplySchedule.of(
                 petHouse, 
                 scheduleRequest.feedType(), 
@@ -63,5 +40,45 @@ public class SupplyService {
         );
 
         return ScheduleResponse.from(supplyScheduleRepository.save(supplySchedule));
+    }
+
+    public ScheduleResponse updateSchedule(Long houseId, Long scheduleId, ScheduleRequest scheduleRequest) {
+        if (supplyScheduleRepository.existsByPetHouse_HouseIdAndFeedTypeAndCronExpressionAndIdNot(houseId, scheduleRequest.feedType(), scheduleRequest.cronExpression(), scheduleId)) {
+            throw new IllegalStateException("이미 해당 시간에 동일한 급여 설정이 존재합니다.");
+        }
+
+        SupplySchedule supplySchedule = supplyScheduleRepository.findByPetHouse_HouseIdAndId(houseId, scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 스케줄을 찾을 수 없습니다."));
+
+        supplySchedule.updateSupplySchedule(
+                scheduleRequest.feedType(),
+                scheduleRequest.unitType(),
+                scheduleRequest.amount(),
+                scheduleRequest.cronExpression()
+        );
+
+        return ScheduleResponse.from(supplySchedule);
+    }
+
+    public ScheduleToggleResponse toggleSchedule(Long houseId, Long scheduleId, boolean enabled) {
+        SupplySchedule supplySchedule = supplyScheduleRepository.findByPetHouse_HouseIdAndId(houseId, scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 스케줄을 찾을 수 없습니다."));
+
+        supplySchedule.toggleSupplySchedule(enabled);
+
+        return ScheduleToggleResponse.from(supplySchedule);
+    }
+
+    public SupplyLogResponse recordSupplyLog(Long houseId, SupplyLogRequest supplyLogRequest) {
+        PetHouse petHouse = petHouseRepository.getReferenceById(houseId);
+
+        SupplyLog supplyLog = SupplyLog.ofManual(
+                petHouse,
+                supplyLogRequest.feedType(),
+                supplyLogRequest.unitType(),
+                supplyLogRequest.amount()
+        );
+
+        return SupplyLogResponse.from(supplyLogRepository.save(supplyLog));
     }
 }

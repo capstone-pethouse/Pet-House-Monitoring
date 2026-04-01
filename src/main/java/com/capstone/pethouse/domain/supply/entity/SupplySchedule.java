@@ -86,6 +86,17 @@ public class SupplySchedule {
         return new SupplySchedule(petHouse, feedType, unitType, amount, cronExpression, true, null);
     }
 
+    public void updateSupplySchedule(FeedType feedType, UnitType unitType, BigDecimal amount, String cronExpression) {
+        this.feedType = feedType;
+        this.unitType = unitType;
+        this.amount = amount;
+        this.cronExpression = cronExpression;
+    }
+
+    public void toggleSupplySchedule(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
