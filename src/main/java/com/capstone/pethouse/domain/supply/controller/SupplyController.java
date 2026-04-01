@@ -5,6 +5,7 @@ import com.capstone.pethouse.domain.supply.dto.request.ScheduleRequest;
 import com.capstone.pethouse.domain.supply.dto.response.SupplyLogResponse;
 import com.capstone.pethouse.domain.supply.dto.response.ScheduleResponse;
 import com.capstone.pethouse.domain.supply.service.SupplyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class SupplyController {
     @PostMapping("/{houseId}/supplier/schedules")
     public ScheduleResponse postSchedule(
             @PathVariable Long houseId,
-            @RequestBody ScheduleRequest scheduleRequest
+            @Valid @RequestBody ScheduleRequest scheduleRequest
     ) {
         return supplyService.postSchedule(houseId, scheduleRequest);
     }
@@ -29,7 +30,7 @@ public class SupplyController {
     public ScheduleResponse updateSchedule(
             @PathVariable Long houseId,
             @PathVariable Long scheduleId,
-            @RequestBody ScheduleRequest scheduleRequest
+            @Valid @RequestBody ScheduleRequest scheduleRequest
     ) {
         return supplyService.updateSchedule(houseId, scheduleId, scheduleRequest);
     }
