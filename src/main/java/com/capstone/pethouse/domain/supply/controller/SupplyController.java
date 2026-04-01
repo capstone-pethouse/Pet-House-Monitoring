@@ -2,6 +2,7 @@ package com.capstone.pethouse.domain.supply.controller;
 
 import com.capstone.pethouse.domain.supply.dto.request.SupplyLogRequest;
 import com.capstone.pethouse.domain.supply.dto.request.ScheduleRequest;
+import com.capstone.pethouse.domain.supply.dto.response.ScheduleToggleResponse;
 import com.capstone.pethouse.domain.supply.dto.response.SupplyLogResponse;
 import com.capstone.pethouse.domain.supply.dto.response.ScheduleResponse;
 import com.capstone.pethouse.domain.supply.service.SupplyService;
@@ -33,6 +34,16 @@ public class SupplyController {
             @Valid @RequestBody ScheduleRequest scheduleRequest
     ) {
         return supplyService.updateSchedule(houseId, scheduleId, scheduleRequest);
+    }
+
+    // 자동 급수 / 급식 스케줄러 활성, 비활성 토글
+    @PatchMapping("/{houseId}/supplier/schedules/{scheduleId}/toggle")
+    public ScheduleToggleResponse toggleSchedule(
+            @PathVariable Long houseId,
+            @PathVariable Long scheduleId,
+            @RequestParam boolean enabled
+    ) {
+        return supplyService.toggleSchedule(houseId, scheduleId, enabled);
     }
 
     // 제공된 급식 / 급수에 대한 supply_log 저장 (수동 제공시)
