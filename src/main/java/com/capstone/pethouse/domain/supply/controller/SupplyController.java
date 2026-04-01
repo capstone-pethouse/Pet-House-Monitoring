@@ -51,6 +51,15 @@ public class SupplyController {
         return supplyService.toggleSchedule(houseId, scheduleId, enabled);
     }
 
+    // 자동 급수 / 급식 스케줄러 삭제
+    @DeleteMapping("/{houseId}/supplier/schedules/{scheduleId}")
+    public Long deleteSchedule(
+            @PathVariable Long houseId,
+            @PathVariable Long scheduleId
+    ) {
+        return supplyService.deleteSchedule(houseId, scheduleId);
+    }
+
     // 제공된 급식 / 급수에 대한 supply_log 저장 (수동 제공시)
     // 자동 급식 / 급수 제공 시엔 MQTT 리스너가 서비스 호출
     @PostMapping("/{houseId}/supplier/record")
