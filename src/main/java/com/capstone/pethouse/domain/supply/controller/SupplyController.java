@@ -22,6 +22,15 @@ public class SupplyController {
 
     private final SupplyService supplyService;
 
+    // 자동 급수 / 급식 스케줄러 가져오기
+    @GetMapping("/{houseId}/supplier/schedules")
+    public Page<ScheduleResponse> getSchedules(
+            @PathVariable Long houseId,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return supplyService.getSchedules(houseId, pageable);
+    }
+
     // 자동 급수 / 급식 스케줄러 등록
     @PostMapping("/{houseId}/supplier/schedules")
     public ScheduleResponse postSchedule(
@@ -70,6 +79,7 @@ public class SupplyController {
         return supplyService.recordSupplyLog(houseId, supplyLogRequest);
     }
 
+    // 실제로 제공된 급식 / 급수에 대한 supply_log 보여주기
     @GetMapping("/{houseId}/supplier/record")
     public Page<SupplyLogHistoryResponse> getSupplyHistory(
             @PathVariable Long houseId,
