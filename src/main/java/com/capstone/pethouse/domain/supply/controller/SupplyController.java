@@ -24,49 +24,49 @@ public class SupplyController {
 
     // 자동 급수 / 급식 스케줄러 가져오기
     @GetMapping("/{houseId}/supplier/schedules")
-    public Page<SupplyScheduleResponse> getSchedules(
+    public Page<SupplyScheduleResponse> getSupplySchedules(
             @PathVariable Long houseId,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return supplyService.getSchedules(houseId, pageable);
+        return supplyService.getSupplySchedules(houseId, pageable);
     }
 
     // 자동 급수 / 급식 스케줄러 등록
     @PostMapping("/{houseId}/supplier/schedules")
-    public SupplyScheduleResponse postSchedule(
+    public SupplyScheduleResponse postSupplySchedule(
             @PathVariable Long houseId,
             @Valid @RequestBody SupplyScheduleRequest supplyScheduleRequest
     ) {
-        return supplyService.postSchedule(houseId, supplyScheduleRequest);
+        return supplyService.postSupplySchedule(houseId, supplyScheduleRequest);
     }
 
     // 자동 급수 / 급식 스케줄러 수정
     @PutMapping("/{houseId}/supplier/schedules/{scheduleId}")
-    public SupplyScheduleResponse updateSchedule(
+    public SupplyScheduleResponse updateSupplySchedule(
             @PathVariable Long houseId,
             @PathVariable Long scheduleId,
             @Valid @RequestBody SupplyScheduleRequest supplyScheduleRequest
     ) {
-        return supplyService.updateSchedule(houseId, scheduleId, supplyScheduleRequest);
+        return supplyService.updateSupplySchedule(houseId, scheduleId, supplyScheduleRequest);
     }
 
     // 자동 급수 / 급식 스케줄러 활성, 비활성 토글
     @PatchMapping("/{houseId}/supplier/schedules/{scheduleId}/toggle")
-    public SupplyToggleResponse toggleSchedule(
+    public SupplyToggleResponse toggleSupplySchedule(
             @PathVariable Long houseId,
             @PathVariable Long scheduleId,
             @RequestParam boolean enabled
     ) {
-        return supplyService.toggleSchedule(houseId, scheduleId, enabled);
+        return supplyService.toggleSupplySchedule(houseId, scheduleId, enabled);
     }
 
     // 자동 급수 / 급식 스케줄러 삭제
     @DeleteMapping("/{houseId}/supplier/schedules/{scheduleId}")
-    public Long deleteSchedule(
+    public Long deleteSupplySchedule(
             @PathVariable Long houseId,
             @PathVariable Long scheduleId
     ) {
-        return supplyService.deleteSchedule(houseId, scheduleId);
+        return supplyService.deleteSupplySchedule(houseId, scheduleId);
     }
 
     // 제공된 급식 / 급수에 대한 supply_log 저장 (수동 제공시)
