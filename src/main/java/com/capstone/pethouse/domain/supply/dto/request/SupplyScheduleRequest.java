@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-public record ScheduleRequest(
+public record SupplyScheduleRequest(
 
         @NotNull(message = "급여 종류는 필수입니다.")
         FeedType feedType,

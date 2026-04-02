@@ -7,7 +7,7 @@ import com.capstone.pethouse.domain.supply.entity.SupplySchedule;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record ScheduleResponse(
+public record SupplyScheduleResponse(
         Long houseId,
         Long scheduleId,
         FeedType feedType,
@@ -17,8 +17,8 @@ public record ScheduleResponse(
         boolean enabled,
         LocalDateTime lastRunAt
 ) {
-    public static ScheduleResponse from(SupplySchedule supplySchedule) {
-        return new ScheduleResponse(
+    public static SupplyScheduleResponse from(SupplySchedule supplySchedule) {
+        return new SupplyScheduleResponse(
                 supplySchedule.getPetHouse().getHouseId(),
                 supplySchedule.getId(),
                 supplySchedule.getFeedType(), 

@@ -1,11 +1,11 @@
 package com.capstone.pethouse.domain.supply.controller;
 
 import com.capstone.pethouse.domain.supply.dto.request.SupplyLogRequest;
-import com.capstone.pethouse.domain.supply.dto.request.ScheduleRequest;
-import com.capstone.pethouse.domain.supply.dto.response.ScheduleToggleResponse;
+import com.capstone.pethouse.domain.supply.dto.request.SupplyScheduleRequest;
+import com.capstone.pethouse.domain.supply.dto.response.SupplyToggleResponse;
 import com.capstone.pethouse.domain.supply.dto.response.SupplyLogHistoryResponse;
 import com.capstone.pethouse.domain.supply.dto.response.SupplyLogResponse;
-import com.capstone.pethouse.domain.supply.dto.response.ScheduleResponse;
+import com.capstone.pethouse.domain.supply.dto.response.SupplyScheduleResponse;
 import com.capstone.pethouse.domain.supply.service.SupplyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class SupplyController {
 
     // 자동 급수 / 급식 스케줄러 가져오기
     @GetMapping("/{houseId}/supplier/schedules")
-    public Page<ScheduleResponse> getSchedules(
+    public Page<SupplyScheduleResponse> getSchedules(
             @PathVariable Long houseId,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -33,26 +33,26 @@ public class SupplyController {
 
     // 자동 급수 / 급식 스케줄러 등록
     @PostMapping("/{houseId}/supplier/schedules")
-    public ScheduleResponse postSchedule(
+    public SupplyScheduleResponse postSchedule(
             @PathVariable Long houseId,
-            @Valid @RequestBody ScheduleRequest scheduleRequest
+            @Valid @RequestBody SupplyScheduleRequest supplyScheduleRequest
     ) {
-        return supplyService.postSchedule(houseId, scheduleRequest);
+        return supplyService.postSchedule(houseId, supplyScheduleRequest);
     }
 
     // 자동 급수 / 급식 스케줄러 수정
     @PutMapping("/{houseId}/supplier/schedules/{scheduleId}")
-    public ScheduleResponse updateSchedule(
+    public SupplyScheduleResponse updateSchedule(
             @PathVariable Long houseId,
             @PathVariable Long scheduleId,
-            @Valid @RequestBody ScheduleRequest scheduleRequest
+            @Valid @RequestBody SupplyScheduleRequest supplyScheduleRequest
     ) {
-        return supplyService.updateSchedule(houseId, scheduleId, scheduleRequest);
+        return supplyService.updateSchedule(houseId, scheduleId, supplyScheduleRequest);
     }
 
     // 자동 급수 / 급식 스케줄러 활성, 비활성 토글
     @PatchMapping("/{houseId}/supplier/schedules/{scheduleId}/toggle")
-    public ScheduleToggleResponse toggleSchedule(
+    public SupplyToggleResponse toggleSchedule(
             @PathVariable Long houseId,
             @PathVariable Long scheduleId,
             @RequestParam boolean enabled
