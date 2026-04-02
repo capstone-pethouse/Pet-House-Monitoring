@@ -1,11 +1,11 @@
 package com.capstone.pethouse.domain.supply.controller;
 
 import com.capstone.pethouse.domain.supply.dto.request.SupplyLogRequest;
-import com.capstone.pethouse.domain.supply.dto.request.ScheduleRequest;
-import com.capstone.pethouse.domain.supply.dto.response.ScheduleToggleResponse;
+import com.capstone.pethouse.domain.supply.dto.request.SupplyScheduleRequest;
+import com.capstone.pethouse.domain.supply.dto.response.SupplyToggleResponse;
 import com.capstone.pethouse.domain.supply.dto.response.SupplyLogHistoryResponse;
 import com.capstone.pethouse.domain.supply.dto.response.SupplyLogResponse;
-import com.capstone.pethouse.domain.supply.dto.response.ScheduleResponse;
+import com.capstone.pethouse.domain.supply.dto.response.SupplyScheduleResponse;
 import com.capstone.pethouse.domain.supply.service.SupplyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,49 +24,49 @@ public class SupplyController {
 
     // 자동 급수 / 급식 스케줄러 가져오기
     @GetMapping("/{houseId}/supplier/schedules")
-    public Page<ScheduleResponse> getSchedules(
+    public Page<SupplyScheduleResponse> getSupplySchedules(
             @PathVariable Long houseId,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return supplyService.getSchedules(houseId, pageable);
+        return supplyService.getSupplySchedules(houseId, pageable);
     }
 
     // 자동 급수 / 급식 스케줄러 등록
     @PostMapping("/{houseId}/supplier/schedules")
-    public ScheduleResponse postSchedule(
+    public SupplyScheduleResponse postSupplySchedule(
             @PathVariable Long houseId,
-            @Valid @RequestBody ScheduleRequest scheduleRequest
+            @Valid @RequestBody SupplyScheduleRequest supplyScheduleRequest
     ) {
-        return supplyService.postSchedule(houseId, scheduleRequest);
+        return supplyService.postSupplySchedule(houseId, supplyScheduleRequest);
     }
 
     // 자동 급수 / 급식 스케줄러 수정
     @PutMapping("/{houseId}/supplier/schedules/{scheduleId}")
-    public ScheduleResponse updateSchedule(
+    public SupplyScheduleResponse updateSupplySchedule(
             @PathVariable Long houseId,
             @PathVariable Long scheduleId,
-            @Valid @RequestBody ScheduleRequest scheduleRequest
+            @Valid @RequestBody SupplyScheduleRequest supplyScheduleRequest
     ) {
-        return supplyService.updateSchedule(houseId, scheduleId, scheduleRequest);
+        return supplyService.updateSupplySchedule(houseId, scheduleId, supplyScheduleRequest);
     }
 
     // 자동 급수 / 급식 스케줄러 활성, 비활성 토글
     @PatchMapping("/{houseId}/supplier/schedules/{scheduleId}/toggle")
-    public ScheduleToggleResponse toggleSchedule(
+    public SupplyToggleResponse toggleSupplySchedule(
             @PathVariable Long houseId,
             @PathVariable Long scheduleId,
             @RequestParam boolean enabled
     ) {
-        return supplyService.toggleSchedule(houseId, scheduleId, enabled);
+        return supplyService.toggleSupplySchedule(houseId, scheduleId, enabled);
     }
 
     // 자동 급수 / 급식 스케줄러 삭제
     @DeleteMapping("/{houseId}/supplier/schedules/{scheduleId}")
-    public Long deleteSchedule(
+    public Long deleteSupplySchedule(
             @PathVariable Long houseId,
             @PathVariable Long scheduleId
     ) {
-        return supplyService.deleteSchedule(houseId, scheduleId);
+        return supplyService.deleteSupplySchedule(houseId, scheduleId);
     }
 
     // 제공된 급식 / 급수에 대한 supply_log 저장 (수동 제공시)
