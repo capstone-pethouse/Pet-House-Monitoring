@@ -29,13 +29,13 @@ public class SupplyService {
     private final SupplyScheduleRepository supplyScheduleRepository;
 
     @Transactional(readOnly = true)
-    public Page<SupplyScheduleResponse> getSchedules(Long houseId, Pageable pageable) {
+    public Page<SupplyScheduleResponse> getSupplySchedules(Long houseId, Pageable pageable) {
         Page<SupplySchedule> supplySchedulePage = supplyScheduleRepository.findByPetHouse_HouseId(houseId, pageable);
 
         return supplySchedulePage.map(SupplyScheduleResponse::from);
     }
 
-    public SupplyScheduleResponse postSchedule(Long houseId, SupplyScheduleRequest supplyScheduleRequest) {
+    public SupplyScheduleResponse postSupplySchedule(Long houseId, SupplyScheduleRequest supplyScheduleRequest) {
         if (supplyScheduleRepository.existsByPetHouse_HouseIdAndFeedTypeAndCronExpression(houseId, supplyScheduleRequest.feedType(), supplyScheduleRequest.cronExpression())) {
             throw new IllegalStateException("이미 동일한 스케줄이 존재합니다.");
         }
@@ -52,7 +52,7 @@ public class SupplyService {
         return SupplyScheduleResponse.from(supplyScheduleRepository.save(supplySchedule));
     }
 
-    public SupplyScheduleResponse updateSchedule(Long houseId, Long scheduleId, SupplyScheduleRequest supplyScheduleRequest) {
+    public SupplyScheduleResponse updateSupplySchedule(Long houseId, Long scheduleId, SupplyScheduleRequest supplyScheduleRequest) {
         if (supplyScheduleRepository.existsByPetHouse_HouseIdAndFeedTypeAndCronExpressionAndIdNot(houseId, supplyScheduleRequest.feedType(), supplyScheduleRequest.cronExpression(), scheduleId)) {
             throw new IllegalStateException("이미 해당 시간에 동일한 급여 설정이 존재합니다.");
         }
@@ -70,7 +70,7 @@ public class SupplyService {
         return SupplyScheduleResponse.from(supplySchedule);
     }
 
-    public SupplyToggleResponse toggleSchedule(Long houseId, Long scheduleId, boolean enabled) {
+    public SupplyToggleResponse toggleSupplySchedule(Long houseId, Long scheduleId, boolean enabled) {
         SupplySchedule supplySchedule = supplyScheduleRepository.findByPetHouse_HouseIdAndId(houseId, scheduleId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 스케줄을 찾을 수 없습니다."));
 
@@ -79,7 +79,7 @@ public class SupplyService {
         return SupplyToggleResponse.from(supplySchedule);
     }
 
-    public Long deleteSchedule(Long houseId, Long scheduleId) {
+    public Long deleteSupplySchedule(Long houseId, Long scheduleId) {
         SupplySchedule supplySchedule = supplyScheduleRepository.findByPetHouse_HouseIdAndId(houseId, scheduleId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 스케줄을 찾을 수 없습니다."));
 
