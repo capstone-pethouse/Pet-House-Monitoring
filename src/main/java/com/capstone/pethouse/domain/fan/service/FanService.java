@@ -33,4 +33,13 @@ public class FanService {
 
         return FanToggleResponse.from(fanSchedule);
     }
+
+    public Long deleteFanSchedule(Long houseId, Long scheduleId) {
+        FanSchedule fanSchedule = fanScheduleRepository.findByPetHouse_HouseIdAndId(houseId, scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 스케줄을 찾을 수 없습니다."));
+
+        fanScheduleRepository.delete(fanSchedule);
+
+        return fanSchedule.getId();
+    }
 }

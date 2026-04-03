@@ -36,4 +36,13 @@ public class FanController {
     ) {
         return fanService.toggleFanSchedule(houseId, scheduleId, enabled);
     }
+
+    // 자동 Fan 스케줄러 삭제
+    @DeleteMapping("/{houseId}/fan/schedules/{scheduleId}")
+    public Long deleteFanSchedule(
+            @PathVariable Long houseId,
+            @PathVariable Long scheduleId
+    ) {
+        return fanService.deleteFanSchedule(houseId, scheduleId);
+    }
 }
