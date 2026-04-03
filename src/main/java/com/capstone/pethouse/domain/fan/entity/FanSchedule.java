@@ -79,6 +79,10 @@ public class FanSchedule {
         return new FanSchedule(petHouse, true, temperature, speed, startTime, endTime);
     }
 
+    public void toggleFanSchedule(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
