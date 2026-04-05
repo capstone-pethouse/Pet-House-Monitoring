@@ -2,6 +2,7 @@ package com.capstone.pethouse.domain.fan.service;
 
 import com.capstone.pethouse.domain.device.entity.PetHouse;
 import com.capstone.pethouse.domain.device.repository.PetHouseRepository;
+import com.capstone.pethouse.domain.fan.dto.request.FanScheduleDetailRequest;
 import com.capstone.pethouse.domain.fan.dto.request.FanScheduleRequest;
 import com.capstone.pethouse.domain.fan.dto.response.FanScheduleResponse;
 import com.capstone.pethouse.domain.fan.dto.response.FanToggleResponse;
@@ -13,6 +14,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional
@@ -41,10 +45,30 @@ public class FanService {
         PetHouse petHouse = petHouseRepository.getReferenceById(houseId);
         FanSchedule fanSchedule = FanSchedule.of(petHouse, fanScheduleRequest.startTime(), fanScheduleRequest.endTime());
 
+        validateFanSpeedLogic(fanScheduleRequest.fanScheduleDetailRequestList());
+
         fanScheduleRequest.fanScheduleDetailRequestList()
                 .forEach(request -> fanSchedule.addFanScheduleDetail(request.temperature(), request.speed()));
 
         return FanScheduleResponse.from(fanScheduleRepository.save(fanSchedule));
+    }
+
+    private void validateFanSpeedLogic(List<FanScheduleDetailRequest> detailRequestList) {
+        List<FanScheduleDetailRequest> sortedDetails = detailRequestList.stream()
+                .sorted(Comparator.comparing(FanScheduleDetailRequest::temperature))
+                .toList();
+
+        for (int i = 0; i < sortedDetails.size() - 1; i++) {
+            FanScheduleDetailRequest current = sortedDetails.get(i);
+            FanScheduleDetailRequest next = sortedDetails.get(i+1);
+
+            if (next.speed() <= current.speed()) {
+                throw new IllegalArgumentException(
+                        String.format("온도가 더 높은 설정(%.1f도)의 팬 강도는 이전 설정(%.1f도)보다 높아야 합니다.",
+                                next.temperature(), current.temperature())
+                );
+            }
+        }
     }
 
     public FanToggleResponse toggleFanSchedule(Long houseId, Long scheduleId, boolean enabled) {
