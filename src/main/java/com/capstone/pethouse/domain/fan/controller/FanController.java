@@ -37,6 +37,16 @@ public class FanController {
         return fanService.postFanSchedule(houseId, fanScheduleRequest);
     }
 
+    // 자동 FAN 스케줄러 수정
+    @PutMapping("/{houseId}/fan/schedules/{scheduleId}")
+    public FanScheduleResponse updateSupplySchedule(
+            @PathVariable Long houseId,
+            @PathVariable Long scheduleId,
+            @Valid @RequestBody FanScheduleRequest fanScheduleRequest
+    ) {
+        return fanService.updateFanSchedule(houseId, scheduleId, fanScheduleRequest);
+    }
+
     // 자동 FAN 스케줄러 활성, 비활성 토글
     @PatchMapping("/{houseId}/fan/schedules/{scheduleId}/toggle")
     public FanToggleResponse toggleFanSchedule(
