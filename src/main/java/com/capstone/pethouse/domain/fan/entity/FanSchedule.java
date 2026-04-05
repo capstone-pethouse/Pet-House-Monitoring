@@ -14,7 +14,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @ToString
 @Getter
@@ -41,14 +43,12 @@ public class FanSchedule {
     @JoinColumn(name = "house_id", nullable = false)
     private PetHouse petHouse;
 
+    @ToString.Exclude
+    @OneToMany(mappedBy = "fanSchedule", cascade = CascadeType.ALL, orphanRemoval=true)
+    private final Set<FanScheduleDetail> fanScheduleDetailSet = new LinkedHashSet<>();
+
     @Column(nullable = false)
     private boolean enabled = true;
-
-    @Column(nullable = false, precision = 3, scale = 1)
-    private BigDecimal temperature;
-
-    @Column(nullable = false)
-    private Integer speed;
 
     @Column(nullable = false)
     private LocalTime startTime;
@@ -66,17 +66,20 @@ public class FanSchedule {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
-    private FanSchedule(PetHouse petHouse, boolean enabled, BigDecimal temperature, Integer speed, LocalTime startTime, LocalTime endTime) {
+    public void addFanScheduleDetail(BigDecimal temperature, Integer speed) {
+        FanScheduleDetail fanScheduleDetail = FanScheduleDetail.of(this, temperature, speed);
+        this.fanScheduleDetailSet.add(fanScheduleDetail);
+    }
+
+    private FanSchedule(PetHouse petHouse, boolean enabled, LocalTime startTime, LocalTime endTime) {
         this.petHouse = petHouse;
         this.enabled = enabled;
-        this.temperature = temperature;
-        this.speed = speed;
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
-    public static FanSchedule of(PetHouse petHouse, BigDecimal temperature, Integer speed, LocalTime startTime, LocalTime endTime) {
-        return new FanSchedule(petHouse, true, temperature, speed, startTime, endTime);
+    public static FanSchedule of(PetHouse petHouse, LocalTime startTime, LocalTime endTime) {
+        return new FanSchedule(petHouse, true, startTime, endTime);
     }
 
     public void toggleFanSchedule(boolean enabled) {
