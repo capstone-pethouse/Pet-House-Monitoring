@@ -28,8 +28,28 @@ public class FanScheduleRepositoryImpl implements FanScheduleRepositoryCustom {
         return selectOne != null;
     }
 
+    @Override
+    public boolean existingOverlappingScheduleExcludingSelf(Long houseId, Long scheduleId, LocalTime startTime, LocalTime endTime) {
+        Integer selectOne = queryFactory
+                .selectOne()
+                .from(fanSchedule)
+                .where(
+                        houseIdEq(houseId),
+                        scheduleIdNe(scheduleId),
+                        startTimeBefore(endTime),
+                        endTimeAfter(startTime)
+                )
+                .fetchFirst();
+
+        return selectOne != null;
+    }
+
     private BooleanExpression houseIdEq(Long houseId) {
         return fanSchedule.petHouse.houseId.eq(houseId);
+    }
+
+    private BooleanExpression scheduleIdNe(Long scheduleId) {
+        return fanSchedule.id.ne(scheduleId);
     }
 
     private BooleanExpression startTimeBefore(LocalTime endTime) {
