@@ -1,6 +1,7 @@
 package com.capstone.pethouse.domain.fan.entity;
 
 import com.capstone.pethouse.domain.device.entity.PetHouse;
+import com.capstone.pethouse.domain.fan.dto.request.FanScheduleDetailRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -80,6 +82,16 @@ public class FanSchedule {
 
     public static FanSchedule of(PetHouse petHouse, LocalTime startTime, LocalTime endTime) {
         return new FanSchedule(petHouse, true, startTime, endTime);
+    }
+
+    public void updateFanSchedule(LocalTime startTime, LocalTime endTime, List<FanScheduleDetailRequest> fanScheduleDetailRequestList) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+
+        this.fanScheduleDetailSet.clear();
+
+        fanScheduleDetailRequestList.forEach(detailRequest ->
+                this.addFanScheduleDetail(detailRequest.temperature(), detailRequest.speed()));
     }
 
     public void toggleFanSchedule(boolean enabled) {

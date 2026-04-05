@@ -53,22 +53,27 @@ public class FanService {
         return FanScheduleResponse.from(fanScheduleRepository.save(fanSchedule));
     }
 
-    private void validateFanSpeedLogic(List<FanScheduleDetailRequest> detailRequestList) {
-        List<FanScheduleDetailRequest> sortedDetails = detailRequestList.stream()
-                .sorted(Comparator.comparing(FanScheduleDetailRequest::temperature))
-                .toList();
-
-        for (int i = 0; i < sortedDetails.size() - 1; i++) {
-            FanScheduleDetailRequest current = sortedDetails.get(i);
-            FanScheduleDetailRequest next = sortedDetails.get(i+1);
-
-            if (next.speed() <= current.speed()) {
-                throw new IllegalArgumentException(
-                        String.format("온도가 더 높은 설정(%.1f도)의 팬 강도는 이전 설정(%.1f도)보다 높아야 합니다.",
-                                next.temperature(), current.temperature())
-                );
-            }
+    public FanScheduleResponse updateFanSchedule(Long houseId, Long scheduleId, FanScheduleRequest fanScheduleRequest) {
+        if (fanScheduleRequest.endTime().isBefore(fanScheduleRequest.startTime())) {
+            throw new IllegalArgumentException("시작 시간은 종료 시간보다 빨라야 합니다.");
         }
+
+        if (fanScheduleRepository.existingOverlappingScheduleExcludingSelf(houseId, scheduleId, fanScheduleRequest.startTime(), fanScheduleRequest.endTime())) {
+            throw new IllegalStateException("해당 시간대에 이미 겹치는 팬 스케줄이 존재합니다.");        // 자기 자신을 제외한 scheduler 중 확인
+        }
+
+        validateFanSpeedLogic(fanScheduleRequest.fanScheduleDetailRequestList());
+
+        FanSchedule fanSchedule = fanScheduleRepository.findByPetHouse_HouseIdAndId(houseId, scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 스케줄을 찾을 수 없습니다."));
+
+        fanSchedule.updateFanSchedule(
+                fanScheduleRequest.startTime(),
+                fanScheduleRequest.endTime(),
+                fanScheduleRequest.fanScheduleDetailRequestList()
+        );
+
+        return FanScheduleResponse.from(fanSchedule);
     }
 
     public FanToggleResponse toggleFanSchedule(Long houseId, Long scheduleId, boolean enabled) {
@@ -87,5 +92,23 @@ public class FanService {
         fanScheduleRepository.delete(fanSchedule);
 
         return fanSchedule.getId();
+    }
+
+    private void validateFanSpeedLogic(List<FanScheduleDetailRequest> detailRequestList) {
+        List<FanScheduleDetailRequest> sortedDetails = detailRequestList.stream()
+                .sorted(Comparator.comparing(FanScheduleDetailRequest::temperature))
+                .toList();
+
+        for (int i = 0; i < sortedDetails.size() - 1; i++) {
+            FanScheduleDetailRequest current = sortedDetails.get(i);
+            FanScheduleDetailRequest next = sortedDetails.get(i+1);
+
+            if (next.speed() <= current.speed()) {
+                throw new IllegalArgumentException(
+                        String.format("온도가 더 높은 설정(%.1f도)의 팬 강도는 이전 설정(%.1f도)보다 높아야 합니다.",
+                                next.temperature(), current.temperature())
+                );
+            }
+        }
     }
 }
