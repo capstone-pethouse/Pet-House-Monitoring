@@ -5,6 +5,9 @@ import com.capstone.pethouse.domain.serial.dto.SerialVo;
 import com.capstone.pethouse.domain.serial.service.SerialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,69 +24,44 @@ public class SerialController {
 
     @GetMapping("/list")
     public ResponseEntity<Page<SerialVo>> list(
-            @RequestParam(defaultValue = "1") int pageNum,
-            @RequestParam(defaultValue = "15") int pageSize,
+            @PageableDefault(size = 15, sort = "regDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String searchQuery) {
-        return ResponseEntity.ok(serialService.getSerials(pageNum, pageSize, searchQuery));
+        return ResponseEntity.ok(serialService.getSerials(searchQuery, pageable));
     }
 
     @GetMapping("/{seq}")
-    public ResponseEntity<?> getSerial(@PathVariable Long seq) {
-        try {
-            return ResponseEntity.ok(serialService.getSerial(seq));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<SerialVo> getSerial(@PathVariable Long seq) {
+        return ResponseEntity.ok(serialService.getSerial(seq));
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addSerial(@RequestBody SerialRequest request) {
-        try {
-            String message = serialService.addSerial(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(message);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<String> addSerial(@RequestBody SerialRequest request) {
+        String message = serialService.addSerial(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(message);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<?> updateSerial(@RequestBody SerialRequest request) {
-        try {
-            String message = serialService.updateSerial(request);
-            return ResponseEntity.ok(message);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("수정 실패: " + e.getMessage());
-        }
+    public ResponseEntity<String> updateSerial(@RequestBody SerialRequest request) {
+        String message = serialService.updateSerial(request);
+        return ResponseEntity.ok(message);
     }
 
     @DeleteMapping("/delete/{seq}")
-    public ResponseEntity<?> deleteSerial(@PathVariable Long seq) {
-        try {
-            String message = serialService.deleteSerial(seq);
-            return ResponseEntity.ok(message);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<String> deleteSerial(@PathVariable Long seq) {
+        String message = serialService.deleteSerial(seq);
+        return ResponseEntity.ok(message);
     }
 
     @PutMapping("/use/{serialNum}")
-    public ResponseEntity<?> markAsUsed(@PathVariable String serialNum) {
-        try {
-            String message = serialService.markAsUsed(serialNum);
-            return ResponseEntity.ok(message);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<String> markAsUsed(@PathVariable String serialNum) {
+        String message = serialService.markAsUsed(serialNum);
+        return ResponseEntity.ok(message);
     }
 
     @PutMapping("/release/{serialNum}")
-    public ResponseEntity<?> markAsUnused(@PathVariable String serialNum) {
-        try {
-            String message = serialService.markAsUnused(serialNum);
-            return ResponseEntity.ok(message);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<String> markAsUnused(@PathVariable String serialNum) {
+        String message = serialService.markAsUnused(serialNum);
+        return ResponseEntity.ok(message);
     }
 
     @PostMapping("/generate")

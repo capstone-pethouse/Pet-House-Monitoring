@@ -5,6 +5,9 @@ import com.capstone.pethouse.domain.User.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,41 +23,28 @@ public class MemberController {
 
     @GetMapping("/list")
     public ResponseEntity<Page<MemberResponse>> list(
-            @RequestParam(defaultValue = "1") int pageNum,
-            @RequestParam(defaultValue = "15") int pageSize,
+            @PageableDefault(size = 15, sort = "seq", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String searchType,
             @RequestParam(required = false) String searchQuery) {
-        return ResponseEntity.ok(memberService.getMembers(pageNum, pageSize));
+        return ResponseEntity.ok(memberService.getMembers(searchType, searchQuery, pageable));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody MemberRequest request) {
-        try {
-            MemberResponse response = memberService.register(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<MemberResponse> register(@RequestBody MemberRequest request) {
+        MemberResponse response = memberService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/form")
-    public ResponseEntity<?> registerByAdmin(@RequestBody MemberRequest request) {
-        try {
-            MemberResponse response = memberService.registerByAdmin(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<MemberResponse> registerByAdmin(@RequestBody MemberRequest request) {
+        MemberResponse response = memberService.registerByAdmin(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/form")
-    public ResponseEntity<?> updateByAdmin(@RequestBody MemberRequest request) {
-        try {
-            MemberResponse response = memberService.updateByAdmin(request);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<MemberResponse> updateByAdmin(@RequestBody MemberRequest request) {
+        MemberResponse response = memberService.updateByAdmin(request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/form/{seq}")
@@ -76,13 +66,9 @@ public class MemberController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateMember(@RequestBody MemberRequest request) {
-        try {
-            MemberResponse response = memberService.updateMember(request);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<MemberResponse> updateMember(@RequestBody MemberRequest request) {
+        MemberResponse response = memberService.updateMember(request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping

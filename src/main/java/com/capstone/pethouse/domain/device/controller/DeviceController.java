@@ -7,6 +7,9 @@ import com.capstone.pethouse.domain.device.dto.DeviceVo;
 import com.capstone.pethouse.domain.device.service.DeviceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,40 +27,27 @@ public class DeviceController {
 
     @GetMapping("/list")
     public ResponseEntity<Page<DeviceVo>> list(
-            @RequestParam(defaultValue = "1") int pageNum,
-            @RequestParam(defaultValue = "15") int pageSize,
+            @PageableDefault(size = 15, sort = "regDate", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String searchType,
             @RequestParam(required = false) String searchQuery) {
-        return ResponseEntity.ok(deviceService.getDevices(pageNum, pageSize, searchType, searchQuery));
+        return ResponseEntity.ok(deviceService.getDevices(searchType, searchQuery, pageable));
     }
 
     @GetMapping("/{seq}")
-    public ResponseEntity<?> getDevice(@PathVariable Long seq) {
-        try {
-            return ResponseEntity.ok(deviceService.getDevice(seq));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<DeviceVo> getDevice(@PathVariable Long seq) {
+        return ResponseEntity.ok(deviceService.getDevice(seq));
     }
 
     @PostMapping
-    public ResponseEntity<?> createDevice(@RequestBody DeviceRequest request) {
-        try {
-            DeviceVo response = deviceService.createDevice(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<DeviceVo> createDevice(@RequestBody DeviceRequest request) {
+        DeviceVo response = deviceService.createDevice(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping
-    public ResponseEntity<?> updateDevice(@RequestBody DeviceRequest request) {
-        try {
-            DeviceVo response = deviceService.updateDevice(request);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<DeviceVo> updateDevice(@RequestBody DeviceRequest request) {
+        DeviceVo response = deviceService.updateDevice(request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{seq}")
