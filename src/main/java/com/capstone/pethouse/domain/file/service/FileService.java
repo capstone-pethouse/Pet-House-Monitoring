@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -44,6 +46,11 @@ public class FileService {
         return FileVo.from(file);
     }
 
+    /**
+     * 업로드 흐름:
+     *   1) 디스크 쓰기
+     *   2) DB save (실패 시 catch에서 디스크 파일 삭제 → orphan 방지)
+     */
     @Transactional
     public FileInfo upload(String deviceId, String filename, MultipartFile multipartFile) throws IOException {
         if (deviceId == null || deviceId.isBlank()) {
@@ -53,58 +60,76 @@ public class FileService {
             throw new IllegalArgumentException("file은 필수입니다.");
         }
 
-        String storedFilename = UUID.randomUUID() + "_" + (filename != null ? filename : multipartFile.getOriginalFilename());
-        Path destPath = ensureUploadDir().resolve(storedFilename);
+        String resolvedName = resolveFilename(filename, multipartFile);
+        Path destPath = ensureUploadDir().resolve(UUID.randomUUID() + "_" + resolvedName);
         Files.copy(multipartFile.getInputStream(), destPath, StandardCopyOption.REPLACE_EXISTING);
 
-        FileInfo info = FileInfo.of(
-                deviceId,
-                filename != null ? filename : multipartFile.getOriginalFilename(),
-                destPath.toAbsolutePath().toString(),
-                multipartFile.getContentType(),
-                multipartFile.getSize()
-        );
-        return fileRepository.save(info);
+        try {
+            FileInfo info = FileInfo.of(
+                    deviceId,
+                    resolvedName,
+                    destPath.toAbsolutePath().toString(),
+                    multipartFile.getContentType(),
+                    multipartFile.getSize()
+            );
+            return fileRepository.save(info);
+        } catch (RuntimeException e) {
+            // DB 실패 시 orphan 디스크 파일 즉시 정리
+            tryDelete(destPath);
+            throw e;
+        }
     }
 
+    /**
+     * 수정 흐름:
+     *   1) 새 파일이 있으면 디스크에 먼저 쓰기
+     *   2) 엔티티 업데이트 (영속성 컨텍스트만)
+     *   3) 옛 파일 삭제는 트랜잭션 커밋 후로 지연 → DB 롤백 시 옛 파일 보존
+     *   4) 실패 시 새 파일은 catch에서 정리
+     */
     @Transactional
     public FileInfo updateFile(Long seq, String deviceId, String filename, MultipartFile multipartFile) throws IOException {
         FileInfo file = findOne(seq, deviceId);
 
-        String newPath = file.getFilePath();
-        String newContentType = file.getContentType();
-        Long newSize = file.getFileSize();
-
-        if (multipartFile != null && !multipartFile.isEmpty()) {
-            // 기존 파일 삭제
-            try {
-                Files.deleteIfExists(Paths.get(file.getFilePath()));
-            } catch (IOException e) {
-                log.warn("기존 파일 삭제 실패: {}", file.getFilePath());
-            }
-
-            String storedFilename = UUID.randomUUID() + "_" + (filename != null ? filename : multipartFile.getOriginalFilename());
-            Path destPath = ensureUploadDir().resolve(storedFilename);
-            Files.copy(multipartFile.getInputStream(), destPath, StandardCopyOption.REPLACE_EXISTING);
-
-            newPath = destPath.toAbsolutePath().toString();
-            newContentType = multipartFile.getContentType();
-            newSize = multipartFile.getSize();
+        if (multipartFile == null || multipartFile.isEmpty()) {
+            // 메타데이터만 수정 (파일 그대로)
+            file.update(deviceId, filename, file.getFilePath(), file.getContentType(), file.getFileSize());
+            return file;
         }
 
-        file.update(deviceId, filename, newPath, newContentType, newSize);
-        return file;
+        String oldPath = file.getFilePath();
+        String resolvedName = resolveFilename(filename, multipartFile);
+        Path newPath = ensureUploadDir().resolve(UUID.randomUUID() + "_" + resolvedName);
+        Files.copy(multipartFile.getInputStream(), newPath, StandardCopyOption.REPLACE_EXISTING);
+
+        try {
+            file.update(
+                    deviceId,
+                    resolvedName,
+                    newPath.toAbsolutePath().toString(),
+                    multipartFile.getContentType(),
+                    multipartFile.getSize()
+            );
+            // 옛 파일 삭제는 커밋 후 (롤백되면 옛 파일 보존)
+            registerAfterCommitDeletion(oldPath);
+            return file;
+        } catch (RuntimeException e) {
+            tryDelete(newPath);
+            throw e;
+        }
     }
 
+    /**
+     * 삭제 흐름:
+     *   1) DB 삭제
+     *   2) 디스크 파일 삭제는 커밋 후 (롤백되면 디스크 파일 보존)
+     */
     @Transactional
     public void delete(Long seq, String deviceId) {
         FileInfo file = findOne(seq, deviceId);
-        try {
-            Files.deleteIfExists(Paths.get(file.getFilePath()));
-        } catch (IOException e) {
-            log.warn("파일 삭제 실패: {}", file.getFilePath());
-        }
+        String filePath = file.getFilePath();
         fileRepository.delete(file);
+        registerAfterCommitDeletion(filePath);
     }
 
     @Transactional(readOnly = true)
@@ -142,5 +167,37 @@ public class FileService {
             Files.createDirectories(dir);
         }
         return dir;
+    }
+
+    private String resolveFilename(String filename, MultipartFile multipartFile) {
+        if (filename != null && !filename.isBlank()) return filename;
+        String orig = multipartFile.getOriginalFilename();
+        return (orig != null && !orig.isBlank()) ? orig : "unknown";
+    }
+
+    /**
+     * 트랜잭션 커밋 후 디스크 파일 삭제 등록.
+     * 롤백되면 디스크 파일은 그대로 → 데이터 손실 방지.
+     */
+    private void registerAfterCommitDeletion(String filePath) {
+        if (filePath == null) return;
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    tryDelete(Paths.get(filePath));
+                }
+            });
+        } else {
+            tryDelete(Paths.get(filePath));
+        }
+    }
+
+    private void tryDelete(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            log.warn("파일 삭제 실패: {}", path);
+        }
     }
 }
