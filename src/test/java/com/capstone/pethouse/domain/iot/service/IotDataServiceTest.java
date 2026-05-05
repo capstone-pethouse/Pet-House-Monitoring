@@ -1,5 +1,6 @@
 package com.capstone.pethouse.domain.iot.service;
 
+import com.capstone.pethouse.domain.User.entity.User;
 import com.capstone.pethouse.domain.device.entity.Device;
 import com.capstone.pethouse.domain.device.repository.DeviceRepository;
 import com.capstone.pethouse.domain.iot.dto.IotDataRequest;
@@ -35,7 +36,8 @@ class IotDataServiceTest {
     private HouseDataService houseDataService;
 
     private Device createDevice() {
-        Device d = Device.of("DEV001", "user01", "SN-001", "HOUSE");
+        User user = User.ofUser("user01", "pw", "홍길동", "010-1111-1111");
+        Device d = Device.of("DEV001", user, "SN-001", "HOUSE");
         ReflectionTestUtils.setField(d, "seq", 1L);
         return d;
     }

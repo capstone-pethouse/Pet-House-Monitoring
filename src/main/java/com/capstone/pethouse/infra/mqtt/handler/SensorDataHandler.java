@@ -51,23 +51,25 @@ public class SensorDataHandler implements MqttMessageHandler {
                 return;
             }
 
+            // 디바이스 타입은 등록된 Device로만 결정. 미등록 디바이스는 reject.
+            Device device = deviceRepository.findByDeviceId(deviceId).orElse(null);
+            if (device == null) {
+                log.warn("Unknown device — deviceId={}, houseId={}, payload dropped", deviceId, houseId);
+                return;
+            }
+
             Double temVal = readDouble(node, "temVal", "tem_val");
             Double coVal = readDouble(node, "coVal", "co_val");
+            String type = device.getDeviceType();
 
-            Device device = deviceRepository.findByDeviceId(deviceId).orElse(null);
-            String type = device != null ? device.getDeviceType() : null;
-
-            // heartVal이 있으면 NECK, 없으면 HOUSE로 추론 (type이 null인 경우)
-            Double heartVal = readDouble(node, "heartVal", "heart_val");
-            Double humVal = readDouble(node, "humVal", "hum_val");
-
-            boolean isNeck = "COLLAR".equalsIgnoreCase(type) || "NECK".equalsIgnoreCase(type)
-                    || (type == null && heartVal != null);
-
-            if (isNeck) {
+            if ("COLLAR".equalsIgnoreCase(type) || "NECK".equalsIgnoreCase(type)) {
+                Double heartVal = readDouble(node, "heartVal", "heart_val");
                 neckDataService.create(new NeckDataRequest(deviceId, temVal, heartVal, coVal));
-            } else {
+            } else if ("HOUSE".equalsIgnoreCase(type)) {
+                Double humVal = readDouble(node, "humVal", "hum_val");
                 houseDataService.create(new HouseDataRequest(deviceId, temVal, humVal, coVal));
+            } else {
+                log.warn("Unsupported deviceType={} — deviceId={}, payload dropped", type, deviceId);
             }
         } catch (Exception e) {
             log.error("Failed to process sensor data — houseId={}, payload={}, error={}",

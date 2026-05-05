@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @RequestMapping("/file")
@@ -66,11 +65,15 @@ public class FileController {
         }
     }
 
+    /**
+     * 파일 삭제. RFC 9110에서 DELETE body는 허용되나 IoT 디바이스/CDN/프록시 호환성 문제로
+     * query parameter 방식 사용.
+     */
     @DeleteMapping
-    public ResponseEntity<FileResultResponse> delete(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<FileResultResponse> delete(
+            @RequestParam Long seq,
+            @RequestParam(required = false) String deviceId) {
         try {
-            Long seq = Long.valueOf(body.get("seq").toString());
-            String deviceId = body.get("deviceId") != null ? body.get("deviceId").toString() : null;
             fileService.delete(seq, deviceId);
             return ResponseEntity.ok(FileResultResponse.ok("삭제 완료"));
         } catch (Exception e) {
