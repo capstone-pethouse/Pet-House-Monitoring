@@ -65,7 +65,7 @@ class DeviceCommandServiceTest {
         DeviceCommand c1 = cmd(1L, "SN-001", "FEED", CommandStatus.W);
         DeviceCommand c2 = cmd(2L, "SN-001", "WATER", CommandStatus.W);
 
-        given(deviceCommandRepository.findBySnAndStatusOrderBySeqAsc("SN-001", CommandStatus.W))
+        given(deviceCommandRepository.findForFetchWithLock("SN-001", CommandStatus.W))
                 .willReturn(List.of(c1, c2));
 
         List<CommandFetchResponse> result = deviceCommandService.fetch("SN-001");
@@ -83,7 +83,7 @@ class DeviceCommandServiceTest {
     @Test
     @DisplayName("fetch - W 명령 없으면 빈 리스트")
     void fetchEmpty() {
-        given(deviceCommandRepository.findBySnAndStatusOrderBySeqAsc("SN-002", CommandStatus.W))
+        given(deviceCommandRepository.findForFetchWithLock("SN-002", CommandStatus.W))
                 .willReturn(List.of());
 
         assertThat(deviceCommandService.fetch("SN-002")).isEmpty();

@@ -51,7 +51,8 @@ public class DeviceCommandService {
             throw new IllegalArgumentException("SN은 필수입니다.");
         }
 
-        List<DeviceCommand> waiting = deviceCommandRepository.findBySnAndStatusOrderBySeqAsc(sn, CommandStatus.W);
+        // PESSIMISTIC_WRITE 락으로 같은 SN 동시 폴링 race 차단
+        List<DeviceCommand> waiting = deviceCommandRepository.findForFetchWithLock(sn, CommandStatus.W);
 
         // W → S 전환 (같은 트랜잭션 내 dirty checking으로 update 됨)
         waiting.forEach(DeviceCommand::markSent);
